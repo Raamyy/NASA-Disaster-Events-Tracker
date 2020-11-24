@@ -1,9 +1,9 @@
 let categoriesColors = {}
 
-mapboxgl.accessToken = "pk.eyJ1IjoicmFhbXl5IiwiYSI6ImNraHZsdWF3YzAwdW4yeG54ZnBpd2gyNWkifQ.jwEu0a_fv2swA8uMqHUoIw"
+mapboxgl.accessToken = "pk.eyJ1IjoicmFhbXl5IiwiYSI6ImNraHZzcTZnOTBpYWkzNG1vcnJ6MWczeGkifQ.2tohguwZmtkbsO3MwUbYHw"
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/dark-v10',
+    style: 'mapbox://styles/mapbox/streets-v11',
     zoom: 1.5,
 });
 
