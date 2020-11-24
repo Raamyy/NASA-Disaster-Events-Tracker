@@ -3,7 +3,7 @@ let categoriesColors = {}
 mapboxgl.accessToken = "pk.eyJ1IjoicmFhbXl5IiwiYSI6ImNraHZzcTZnOTBpYWkzNG1vcnJ6MWczeGkifQ.2tohguwZmtkbsO3MwUbYHw"
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v11',
+    style: 'mapbox://styles/mapbox/dark-v10',
     zoom: 1.5,
 });
 
