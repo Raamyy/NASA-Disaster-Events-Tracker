@@ -11,48 +11,49 @@ fetch("https://eonet.sci.gsfc.nasa.gov/api/v2.1/events")
     .then(response => response.json())
     .then(data => {
         const { events } = data;
-        events.forEach(event => {
-            processEvent(event);
+        events.forEach(accidentEvent => {
+            processaccidentEvent(accidentEvent);
         })
     }).then(() => { console.log(categoriesColors); })
 
-function getEventId(event) {
-    return event.categories[0].id;
+function getaccidentEventId(accidentEvent) {
+    return accidentEvent.categories[0].id;
 }
-function processEvent(event) {
+function processaccidentEvent(accidentEvent) {
 
     var popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
         `
-        <p>${event.id}</p>
-        <h2>${event.title}</h2>
-        <h4>${event.categories[0].title}</h4>
-        <a href="${event.sources[0].url}">incident link</a>
+        <p>${accidentEvent.id}</p>
+        <h2>${accidentEvent.title}</h2>
+        <h4>${accidentEvent.categories[0].title}</h4>
+        <a href="${accidentEvent.sources[0].url}">incident link</a>
         `
     );
 
-
-    if (event.geometries.length == 1) {
-        if (event.geometries[0].type == "Point") {
-            drawPointMarker(event.geometries[0], popup, event);
+    if (accidentEvent.geometries.length == 1) {
+        if (accidentEvent.geometries[0].type == "Point") {
+            drawPointMarker(accidentEvent.geometries[0], popup, accidentEvent);
         }
-        //TODO: else draw polygon
+        else if (accidentEvent.geometries[0].type == "Polygon") {
+            drawPolygon(accidentEvent.geometries[0].coordinates, accidentEvent, popup)
+        }
     }
     else {
-        const linePoints = event.geometries.map(geometry => geometry.coordinates);
-        drawLine(linePoints, event, popup)
+        const linePoints = accidentEvent.geometries.map(geometry => geometry.coordinates);
+        drawLine(linePoints, accidentEvent, popup)
     }
 
 }
 
-function drawPointMarker(geometry, popup, event) {
-    new mapboxgl.Marker({ color: getColor(event) })
+function drawPointMarker(geometry, popup, accidentEvent) {
+    new mapboxgl.Marker({ color: getColor(accidentEvent) })
         .setLngLat(geometry.coordinates)
         .addTo(map)
         .setPopup(popup);
 }
 
-function drawLine(linePoints, event, popup) {
-    map.addSource(event.id, {
+function drawLine(linePoints, accidentEvent, popup) {
+    map.addSource(accidentEvent.id, {
         'type': 'geojson',
         'data': {
             'type': 'Feature',
@@ -65,20 +66,20 @@ function drawLine(linePoints, event, popup) {
     });
 
     map.addLayer({
-        'id': event.id,
+        'id': accidentEvent.id,
         'type': 'line',
-        'source': event.id,
+        'source': accidentEvent.id,
         'layout': {
             'line-join': 'round',
             'line-cap': 'round'
         },
         'paint': {
-            'line-color': getColor(event),
+            'line-color': getColor(accidentEvent),
             'line-width': 8
         }
     });
 
-    map.on('click', event.id, function (e) {
+    map.on('click', accidentEvent.id, function (e) {
         console.log(popup)
         popup
             .setLngLat(e.lngLat)
@@ -86,23 +87,73 @@ function drawLine(linePoints, event, popup) {
     });
 
     // Change the cursor to a pointer when the mouse is over the states layer.
-    map.on('mouseenter', event.id, function () {
+    map.on('mouseenter', accidentEvent.id, function () {
         map.getCanvas().style.cursor = 'pointer';
-        map.setPaintProperty(event.id, 'line-opacity', 0.8);
+        map.setPaintProperty(accidentEvent.id, 'line-opacity', 0.8);
 
     });
 
     // Change it back to a pointer when it leaves.
-    map.on('mouseleave', event.id, function () {
+    map.on('mouseleave', accidentEvent.id, function () {
         map.getCanvas().style.cursor = '';
-        map.setPaintProperty(event.id, 'line-opacity', 1);
+        map.setPaintProperty(accidentEvent.id, 'line-opacity', 1);
     });
 }
 
-function getColor(event) {
-    const eventCategory = event.categories[0];
-    categoriesColors[eventCategory.id] = categoriesColors[eventCategory.id] || getRandomColor();
-    return categoriesColors[eventCategory.id];
+function drawPolygon(geometry, accidentEvent, popup) {
+    map.addSource(accidentEvent.id, {
+        'type': 'geojson',
+        'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'Polygon',
+                'coordinates': geometry.coordinates
+            }
+        }
+    });
+
+    map.addLayer({
+        'id': accidentEvent.id,
+        'type': 'line',
+        'source': accidentEvent.id,
+        'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': getColor(accidentEvent),
+            'line-width': 8
+        }
+    });
+
+    map.on('click', accidentEvent.id, function (e) {
+        console.log(popup)
+        popup
+            .setLngLat(e.lngLat)
+            .addTo(map);
+    });
+
+    // Change the cursor to a pointer when the mouse is over the states layer.
+    map.on('mouseenter', accidentEvent.id, function () {
+        map.getCanvas().style.cursor = 'pointer';
+        map.setPaintProperty(accidentEvent.id, 'line-opacity', 0.8);
+
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', accidentEvent.id, function () {
+        map.getCanvas().style.cursor = '';
+        map.setPaintProperty(accidentEvent.id, 'line-opacity', 1);
+    });
+}
+
+
+
+function getColor(accidentEvent) {
+    const accidentEventCategory = accidentEvent.categories[0];
+    categoriesColors[accidentEventCategory.id] = categoriesColors[accidentEventCategory.id] || getRandomColor();
+    return categoriesColors[accidentEventCategory.id];
 }
 
 function getRandomColor() {
