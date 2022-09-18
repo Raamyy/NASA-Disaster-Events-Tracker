@@ -7,7 +7,7 @@ var map = new mapboxgl.Map({
     zoom: 1.5,
 });
 
-fetch("https://eonet.sci.gsfc.nasa.gov/api/v2.1/events")
+fetch("https://eonet.gsfc.nasa.gov/api/v2.1/events")
     .then(response => response.json())
     .then(data => {
         const { events } = data;
